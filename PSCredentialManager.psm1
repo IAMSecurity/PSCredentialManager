@@ -1,10 +1,3 @@
-# Implement your module commands in this script.
-
-
-# Export only the functions using PowerShell standard verb-noun naming.
-# Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
-# This improves performance of command discovery in PowerShell.
-#Export-ModuleMember -Function *-CredMan*
 
 Function Initialize-CredMan{
     [CmdletBinding()]
@@ -18,7 +11,6 @@ Function Initialize-CredMan{
     $Global:CredManConfig
 
 }
-
 function Set-CredManValue{
     Param(
         $path = (Join-Path $env:HOMESHARE "Documents\CredManager.config") ,
@@ -76,8 +68,10 @@ function Get-CredManValue {
 
 }
 
-
-function Get-CredManCredential {
+Function Get-CredManCredential {
+    <#
+    .Synops
+    #>
     param (
         [string] $Application,
         [string] $Environment,
@@ -99,13 +93,3 @@ function Get-CredManCredential {
 
     }
 }
-
-<#
-get-CredManCredential -Application IdentityManager -Environment TST
-get-CredManValue -Application IdentityManager -Environment TST -Value "UserName"
-get-CredManValue -Application IdentityManager -Environment TST -Value "Password"
-
-Get-CredManValue -Application Okta -Environment $Environment -Value "APIKey"
-Get-CredManValue -Application Okta -Environment $Environment -Value "Url"
-
-#>
