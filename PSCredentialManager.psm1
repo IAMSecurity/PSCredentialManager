@@ -7,8 +7,14 @@ Function Initialize-CredMan{
         $Path = (Join-Path $env:HOMESHARE "Documents\CredManager.config")
     )
     $Global:CredManConfigPath = $Path
-    $Global:CredManConfig = Get-Content $Path  | ConvertFrom-Json -AsHashtable
-    $Global:CredManConfig
+    if(Test-Path $Path ){
+
+        $Global:CredManConfig = Get-Content $Path  | ConvertFrom-Json -AsHashtable
+        $Global:CredManConfig
+    }
+    else{
+        New-Item -ItemType File -Path $Path
+    }
 
 }
 function Set-CredManValue{
@@ -22,7 +28,10 @@ function Set-CredManValue{
     )
     if($isSecureString){   $Value =  $Value | ConvertFrom-SecureString}
     $Config = Initialize-CredMan $path
-    if(-not $Config.ContainsKey($Application)){
+    if($null -eq $Config){
+        $Config =  @{$Application = @{$Environment=@{$Key=$Value}}}
+    }
+    if($null -eq $Config -or -not $Config.ContainsKey($Application)){
         $Config.Add($Application , @{$Environment=@{$Key=$Value}})
     }
     if(-not $Config[$Application].ContainsKey($Environment)){
@@ -47,7 +56,11 @@ function Get-CredManValue {
 
     )
     $returnValue = $null
-    if( [string]::IsNullOrEmpty($Config[$Application][$Environment][$Key]) -or $override){
+    if($null -eq $config -or
+    -not $Config.ContainsKey($application) -or
+    -not $Config[$application].ContainsKey($Environment) -or
+    -not $Config[$application][$Environment].ContainsKey($key)-or
+    [string]::IsNullOrEmpty($Config[$Application][$Environment][$Key]) -or $override){
         if($isSecureString){
             $Value =  Read-Host "Fill in the value for $Application\$Environment\$Key" -AsSecureString
         }else{
@@ -81,10 +94,10 @@ Function Get-CredManCredential {
     )
 
     $Username =  Get-CredManValue -Application $Application -Environment $Environment -Key $ConfigUsername
-    $Password =  Get-CredManValue -Application $Application -Environment $Environment -Key $ConfigPassword -isSecret
+    $Password =  Get-CredManValue -Application $Application -Environment $Environment -Key $ConfigPassword -isSecureString
 
     if(-not [string]::isnullorEmpty($Username ) -and -not [string]::isnullorEmpty($Password ) ){
-        $PasswordSecure = $Password | ConvertTo-SecureString
+        $PasswordSecure = $Password
 
         New-Object System.Management.Automation.PsCredential($Username,$PasswordSecure)
     }else {
