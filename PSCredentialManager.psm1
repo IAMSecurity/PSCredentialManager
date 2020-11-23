@@ -20,9 +20,13 @@ Function Initialize-CredMan{
 function Set-CredManValue{
     Param(
         $path = (Join-Path $env:HOMESHARE "Documents\CredManager.config") ,
+        [parameter(Mandatory=$true)]
         $Application,
+        [parameter(Mandatory=$true)]
         $Environnment,
+        [parameter(Mandatory=$true)]
         $Key,
+        [parameter(Mandatory=$true)]
         $Value,
         [switch] $isSecureString
     )
@@ -46,8 +50,11 @@ function Set-CredManValue{
 }
 function Get-CredManValue {
     param (
+        [parameter(Mandatory=$true)]
         [string] $Application,
-        [string] $Environment ="PRD",
+        [parameter(Mandatory=$true)]
+        [string] $Environment,
+        [parameter(Mandatory=$true)]
         [string] $Key,
         $config =  (Initialize-CredMan),
         [switch] $isSecureString,
@@ -86,7 +93,9 @@ Function Get-CredManCredential {
     .Synops
     #>
     param (
+        [parameter(Mandatory=$true)]
         [string] $Application,
+        [parameter(Mandatory=$true)]
         [string] $Environment,
         [string] $ConfigUsername = "UserName",
         [string] $ConfigPassword = "Password"
